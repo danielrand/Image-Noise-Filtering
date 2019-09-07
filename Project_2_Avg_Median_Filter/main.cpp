@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 using namespace std;
 
 class ImageProcesing {
@@ -59,11 +60,45 @@ public:
                 neighborAry[++index] = mirrorFramedAry[i][j];
     }
     
+    int avgNeighborhood () {
+        int sum = 0;
+        for (int i = 0; i < 9; i++)
+            sum += neighborAry[i];
+        return (sum/9);
+    }
+    
     void computeAvg () {
         for (int i = 1; i <= numRows; i++) {
             for (int j = 1; j <= numCols; j++) {
                 loadNeighbors(i, j);
+                avgAry[i][j] = avgNeighborhood();
             }
+        }
+    }
+    
+    void computeMedian () {
+        for (int i = 1; i <= numRows; i++) {
+            for (int j = 1; j <= numCols; j++) {
+                loadNeighbors(i, j);
+                sort(neighborAry,neighborAry+9);
+                medianAry[i][j] = neighborAry[4];
+            }
+        }
+    }
+    
+    
+    void printToFile (ofstream & outFile1, ofstream & outFile2) {
+        outFile1 << "Average Array:\n";
+        for (int i = 1; i <= numRows; i++) {
+            for (int j = 1; j <= numCols; j++) {
+                outFile1 << avgAry[i][j] << " ";
+            } outFile1 << endl;
+        }
+        outFile2 << "Median Array:\n";
+        for (int i = 1; i <= numRows; i++) {
+            for (int j = 1; j <= numCols; j++) {
+                outFile2 << medianAry[i][j] << " ";
+            } outFile2 << endl;
         }
     }
     
@@ -90,6 +125,8 @@ int main(int argc, const char * argv[]) {
     IP.loadImage(inFile);
     IP.mirrorFraming();
     IP.computeAvg();
+    IP.computeMedian();
+    IP.printToFile(outFile1, outFile2);
     inFile.close();
     outFile1.close();
     outFile2.close();
