@@ -15,6 +15,8 @@ public:
     
     ImageProcesing (ifstream & inFile) {
         inFile >> numRows >> numCols >> minVal >> maxVal;
+        newMin = INT_MAX;
+        newMax = INT_MIN;
         mirrorFramedAry = new int * [numRows+2];
         avgAry = new int * [numRows+2];
         medianAry = new int * [numRows+2];
@@ -24,14 +26,6 @@ public:
             avgAry[i] = new int [numCols + 2] ();
             medianAry[i] = new int [numCols + 2] ();
         }
-        /* Print ary just in case
-        for (int i = 0; i < numRows +2; i++) {
-            for (int j = 0; j< numCols +2; j++) {
-                cout << mirrorFramedAry[i][j] << " ";
-            } cout << endl;
-        }
-         */
-        
     }
     // read from input file and load onto mirrorFramedAry begin at [1][1]
     void loadImage (ifstream & inFile) {
@@ -72,33 +66,37 @@ public:
             for (int j = 1; j <= numCols; j++) {
                 loadNeighbors(i, j);
                 avgAry[i][j] = avgNeighborhood();
+                if (avgAry[i][j] < newMin)
+                    newMin = avgAry[i][j];
+                if (avgAry[i][j] > newMax)
+                    newMax = avgAry[i][j];
             }
         }
     }
     
     void computeMedian () {
+        newMin = INT_MAX;
+        newMax = INT_MIN;
         for (int i = 1; i <= numRows; i++) {
             for (int j = 1; j <= numCols; j++) {
                 loadNeighbors(i, j);
                 sort(neighborAry,neighborAry+9);
                 medianAry[i][j] = neighborAry[4];
+                if (medianAry[i][j] < newMin)
+                    newMin = medianAry[i][j];
+                if (medianAry[i][j] > newMax)
+                    newMax = medianAry[i][j];
             }
         }
     }
     
     
-    void printToFile (ofstream & outFile1, ofstream & outFile2) {
-        outFile1 << "Average Array:\n";
+    void printToFile (int ** array, ofstream & oufFile) {
+        oufFile << numRows << " " << numCols << " " << newMin << " " << newMax << endl;
         for (int i = 1; i <= numRows; i++) {
             for (int j = 1; j <= numCols; j++) {
-                outFile1 << avgAry[i][j] << " ";
-            } outFile1 << endl;
-        }
-        outFile2 << "Median Array:\n";
-        for (int i = 1; i <= numRows; i++) {
-            for (int j = 1; j <= numCols; j++) {
-                outFile2 << medianAry[i][j] << " ";
-            } outFile2 << endl;
+                oufFile << array[i][j] << " ";
+            } oufFile << endl;
         }
     }
     
@@ -125,8 +123,9 @@ int main(int argc, const char * argv[]) {
     IP.loadImage(inFile);
     IP.mirrorFraming();
     IP.computeAvg();
+    IP.printToFile(IP.avgAry, outFile1);
     IP.computeMedian();
-    IP.printToFile(outFile1, outFile2);
+    IP.printToFile(IP.medianAry, outFile2);
     inFile.close();
     outFile1.close();
     outFile2.close();
