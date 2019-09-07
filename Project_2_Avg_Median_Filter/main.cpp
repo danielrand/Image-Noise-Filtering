@@ -40,7 +40,31 @@ public:
     }
     
     void mirrorFraming () {
-        
+        //Leftmost and Rightmost columns:
+        for (int i = 1; i <= numRows; i++) {
+            mirrorFramedAry[i][0] = mirrorFramedAry[i][1];
+            mirrorFramedAry[i][numCols+1] = mirrorFramedAry[i][numCols];
+        }
+        //Top and bottom rows:
+        for (int i = 0; i <= numCols+1; i++) {
+            mirrorFramedAry[0][i] = mirrorFramedAry[1][i];
+            mirrorFramedAry[numRows+1][i] = mirrorFramedAry[numRows][i];
+        }
+    }
+    
+    void loadNeighbors (int row, int col) {
+        int index = -1;
+        for (int i = row - 1; i <= row + 1; i++)
+            for (int j = col - 1; j <= col + 1; j++)
+                neighborAry[++index] = mirrorFramedAry[i][j];
+    }
+    
+    void computeAvg () {
+        for (int i = 1; i <= numRows; i++) {
+            for (int j = 1; j <= numCols; j++) {
+                loadNeighbors(i, j);
+            }
+        }
     }
     
     void processImage (ifstream & inFile,ofstream &outFile) {
@@ -65,7 +89,7 @@ int main(int argc, const char * argv[]) {
     ImageProcesing IP (inFile);
     IP.loadImage(inFile);
     IP.mirrorFraming();
-    cout << "Hello, World!\n";
+    IP.computeAvg();
     inFile.close();
     outFile1.close();
     outFile2.close();
